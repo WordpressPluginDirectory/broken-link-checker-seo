@@ -1,10 +1,10 @@
 === Broken Link Checker by AIOSEO – Easily Fix/Monitor Internal and External links ===
 Contributors: aioseo, smub, benjaminprojas
 Tags: broken links, internal link, external link, links, test links, check links, bad links, seo
-Tested up to: 6.4.3
-Requires at least: 5.0
+Tested up to: 6.5
+Requires at least: 5.3
 Requires PHP: 5.6
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -86,6 +86,16 @@ Visit <a href="http://www.wpbeginner.com/" rel="friend" title="WPBeginner">WPBeg
 
 == Changelog ==
 
+**New in Version 1.2.0**
+
+* New: Broken Links Highlighter - The new highlighter marks broken links on the frontend of your website, making it easier for you to find and fix them.
+* New: AIOSEO Redirects Integration - BLC now integrates with AIOSEO Redirects so that you can easily redirect broken links to a working URL.
+* Updated: Added additional inline error alerts for better user experience.
+* Fixed: URLs with encoded characters could not be scanned because they were incorrectly hashed in the database.
+* Fixed: URLs for media files (with the exception of images) are no longer indexed.
+* Fixed: Unified URL rows now correctly respect the included post types, included post status, excluded posts and excluded domain settings.
+* Fixed: When deleting a post, the confirmation modal now correctly shows up again.
+
 **New in Version 1.1.2**
 
 * Fixed: PHP error causing settings screen not to load when using default excluded domains value.
@@ -131,7 +141,7 @@ Visit <a href="http://www.wpbeginner.com/" rel="friend" title="WPBeginner">WPBeg
 
 **New in Version 1.0.2**
 
-* Updated: Broken links scan starts immmediately after user connects to their account.
+* Updated: Broken links scan starts immediately after user connects to their account.
 
 **New in Version 1.0.1**
 
@@ -145,6 +155,6 @@ Visit <a href="http://www.wpbeginner.com/" rel="friend" title="WPBeginner">WPBeg
 
 == Upgrade Notice ==
 
-= 1.1.0 =
+= 1.2.0 =
 
 This update adds major improvements and bug fixes.
