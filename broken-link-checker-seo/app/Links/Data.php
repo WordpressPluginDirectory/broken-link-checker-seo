@@ -1,12 +1,12 @@
 <?php
 namespace AIOSEO\BrokenLinkChecker\Links;
 
-use AIOSEO\BrokenLinkChecker\Models;
-
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use AIOSEO\BrokenLinkChecker\Models;
 
 /**
  * Handles the extraction, parsing and storage of links for the links scan.
@@ -148,6 +148,9 @@ class Data {
 	private function extractLinks( $postId, $postContent ) {
 		$postContent = aioseoBrokenLinkChecker()->helpers->decodeHtmlEntities( $postContent );
 
+		// Strip data URIs to prevent catastrophic backtracking.
+		$postContent = preg_replace( '/data:[^;]+;base64,[^"]+/', '', (string) $postContent );
+
 		/**
 		 * Regex pattern divided into groups:
 		 * 0  - Full phrase with link tag.
@@ -159,7 +162,7 @@ class Data {
 		 */
 		preg_match_all(
 			'/(([^\r\n.?!]*)<t?a[^>]*?href=(\"|\')(?!tel:|mailto:)([^\"\']*?)(\"|\')[^>]*?>([\s\w\W]*?)<\/t?a>|<!-- wp:core-embed\/wordpress {"url":"([^"]*?)"[^}]*?"} -->|(?:>|&nbsp;|\s)((?:(?:http|ftp|https)\:\/\/)(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))(?:<|&nbsp;|\s))([^<>.?!\r\n]*)([.?!]?)/i', // phpcs:disable Generic.Files.LineLength.MaxExceeded
-			$postContent,
+			(string) $postContent,
 			$matches
 		);
 
@@ -195,7 +198,7 @@ class Data {
 			$anchor   = wp_strip_all_tags( $matches[6][ $k ] );
 			// Remove trailing URL tags. The regex isn't sufficient for this.
 			$phrase = wp_strip_all_tags( $matches[0][ $k ] );
-			$phrase = trim( preg_replace( '/(.*)(<t?a[^<>].*$)/', '', $phrase ) );
+			$phrase = trim( preg_replace( '/(.*)(<t?a[^<>].*$)/', '', (string) $phrase ) );
 
 			// Don't continue if the anchor or phrase are empty, e.g. blank link tag.
 			if ( ! $anchor || ! $phrase ) {
@@ -216,8 +219,8 @@ class Data {
 			// Reformat the URL to get rid of params and fragments.
 			$url = $this->geturlWithoutParamsAndFragment( $parsedUrl );
 
-			// We need to escape it here so the hash is calculated based on the escaped version.
-			$url = esc_url( $url );
+			// We need to sanitize the URL here so the hash is calculated based on the escaped version.
+			$url = trim( sanitize_url( $url ) );
 
 			$linkData = [
 				'post_id'            => (int) $postId,
@@ -341,7 +344,7 @@ class Data {
 		$postsPerScan        = apply_filters( 'aioseo_blc_links_posts_per_scan', 50 );
 		$postTypes           = aioseoBrokenLinkChecker()->helpers->getScannablePostTypes();
 		$postStatuses        = aioseoBrokenLinkChecker()->helpers->getPublicPostStatuses( true );
-		$minimumLinkScanDate = aioseoBrokenLinkChecker()->internalOptions->internal->minimumLinkScanDate;
+		$minimumLinkScanDate = aioseoBrokenLinkChecker()->internalOptions->internal->minimumLinkScanDate ?: date( 'Y-m-d H:i:s' );
 
 		$query = aioseoBrokenLinkChecker()->core->db->start( 'posts as p' )
 			->leftJoin( 'aioseo_blc_posts as abp', 'p.ID = abp.post_id' )
@@ -411,53 +414,6 @@ class Data {
 	 */
 	private function setIgnoredExtensions() {
 		$this->ignoredExtensions = apply_filters( 'aioseo_blc_ignored_extensions', [
-			// Audio files
-			'aif',
-			'cda',
-			'mid',
-			'midi',
-			'mp3',
-			'mpa',
-			'ogg',
-			'wav',
-			'wma',
-			'wpl',
-			// Compressed files
-			'7z',
-			'arj',
-			'deb',
-			'pkg',
-			'rar',
-			'rpm',
-			'tar.gz',
-			'tar.xz',
-			'tar',
-			'z',
-			'zip',
-			// Disc files
-			'bin',
-			'dmg',
-			'iso',
-			'toast',
-			'vcd',
-			// Data files
-			'csv',
-			'dat',
-			'db',
-			'log',
-			'mdb',
-			'sav',
-			'sql',
-			// E-mail files
-			'eml',
-			'emlx',
-			'mht',
-			'mhtml',
-			'msg',
-			'oft',
-			'ost',
-			'pst',
-			'vcf',
 			// Executable files
 			'apk',
 			'bat',
@@ -469,73 +425,6 @@ class Data {
 			'jar',
 			'py',
 			'wsf',
-			// Font files
-			'eot',
-			'fnt',
-			'fon',
-			'otf',
-			'ttf',
-			// Presentation files
-			'key',
-			'odp',
-			'pps',
-			'ppt',
-			'pptx',
-			// Programming files
-			'c',
-			'class',
-			'cpp',
-			'cs',
-			'h',
-			'java',
-			'pl',
-			'sh',
-			'swift',
-			'vb',
-			// Spreadsheet files
-			'ods',
-			'xls',
-			'xlsm',
-			'xlsx',
-			// System files
-			'bak',
-			'cab',
-			'cfg',
-			'cpl',
-			'cur',
-			'dll',
-			'dmp',
-			'drv',
-			'icns',
-			'ini',
-			'lnk',
-			'msi',
-			'sys',
-			'tmp',
-			// Video files
-			'3g2',
-			'3gp',
-			'avi',
-			'flv',
-			'h264',
-			'mkv',
-			'mov',
-			'mp4',
-			'mpg',
-			'mpeg',
-			'rm',
-			'swf',
-			'vob',
-			'wmv',
-			// Text processor files
-			'doc',
-			'docx',
-			'odt',
-			'pdf',
-			'rtf',
-			'tex',
-			'txt',
-			'wpd'
 		] );
 	}
 }

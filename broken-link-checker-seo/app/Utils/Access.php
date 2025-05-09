@@ -204,4 +204,15 @@ class Access {
 
 		return false;
 	}
+
+	/**
+	 * Returns the capability list.
+	 *
+	 * @since 1.2.4
+	 *
+	 * @return array An array of capabilities.
+	 */
+	public function getCapabilityList() {
+		return $this->capabilities;
+	}
 }

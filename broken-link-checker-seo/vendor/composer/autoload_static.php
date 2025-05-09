@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0529d6e4fa34503461e6d0dcc97d844d
+class ComposerStaticInitea83457257a54dc833bf8ffd41c209c3
 {
     public static $prefixLengthsPsr4 = array (
         'A' => 
@@ -23,6 +23,7 @@ class ComposerStaticInit0529d6e4fa34503461e6d0dcc97d844d
     public static $classMap = array (
         'AIOSEO\\BrokenLinkChecker\\Admin\\Admin' => __DIR__ . '/../..' . '/app/Admin/Admin.php',
         'AIOSEO\\BrokenLinkChecker\\Admin\\License' => __DIR__ . '/../..' . '/app/Admin/License.php',
+        'AIOSEO\\BrokenLinkChecker\\Admin\\Notices\\NotConnected' => __DIR__ . '/../..' . '/app/Admin/Notices/NotConnected.php',
         'AIOSEO\\BrokenLinkChecker\\Admin\\Notices\\Review' => __DIR__ . '/../..' . '/app/Admin/Notices/Review.php',
         'AIOSEO\\BrokenLinkChecker\\Admin\\Notifications' => __DIR__ . '/../..' . '/app/Admin/Notifications.php',
         'AIOSEO\\BrokenLinkChecker\\Api\\Api' => __DIR__ . '/../..' . '/app/Api/Api.php',
@@ -91,9 +92,9 @@ class ComposerStaticInit0529d6e4fa34503461e6d0dcc97d844d
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0529d6e4fa34503461e6d0dcc97d844d::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0529d6e4fa34503461e6d0dcc97d844d::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit0529d6e4fa34503461e6d0dcc97d844d::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitea83457257a54dc833bf8ffd41c209c3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitea83457257a54dc833bf8ffd41c209c3::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitea83457257a54dc833bf8ffd41c209c3::$classMap;
 
         }, null, ClassLoader::class);
     }

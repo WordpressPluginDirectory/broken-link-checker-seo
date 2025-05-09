@@ -33,6 +33,15 @@ class Notifications {
 	private $reviewNotice;
 
 	/**
+	 * The Not Connected notice class instance.
+	 *
+	 * @since 1.2.1
+	 *
+	 * @var Notices\NotConnected
+	 */
+	private $notConnectedNotice;
+
+	/**
 	 * Class constructor.
 	 *
 	 * @since 1.0.0
@@ -65,7 +74,8 @@ class Notifications {
 
 		$this->checkForUpdates();
 
-		$this->reviewNotice = new Notices\Review();
+		$this->notConnectedNotice = new Notices\NotConnected();
+		$this->reviewNotice       = new Notices\Review();
 	}
 
 	/**
@@ -80,6 +90,7 @@ class Notifications {
 			return;
 		}
 
+		$this->notConnectedNotice->maybeShowNotice();
 		$this->reviewNotice->maybeShowNotice();
 	}
 
@@ -276,8 +287,8 @@ class Notifications {
 	 */
 	private function versionMatch( $currentVersion, $compareVersion ) {
 		if ( is_array( $compareVersion ) ) {
-			foreach ( $compareVersion as $compare_single ) {
-				$recursiveResult = $this->versionMatch( $currentVersion, $compare_single );
+			foreach ( $compareVersion as $compare_single ) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName
+				$recursiveResult = $this->versionMatch( $currentVersion, $compare_single ); // phpcs:ignore Squiz.NamingConventions.ValidVariableName
 				if ( $recursiveResult ) {
 					return true;
 				}

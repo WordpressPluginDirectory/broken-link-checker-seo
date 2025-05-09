@@ -32,7 +32,7 @@ class Admin {
 	private $currentPage = '';
 
 	/**
-	 * An list of asset slugs to use.
+	 * A list of asset slugs to use.
 	 *
 	 * @since 1.0.0
 	 *
@@ -74,7 +74,7 @@ class Admin {
 		add_action( 'admin_menu', [ $this, 'hideScheduledActionsMenu' ], 999 );
 		add_filter( 'language_attributes', [ $this, 'addDirAttribute' ], 3000 );
 
-		// add_filter( 'plugin_row_meta', [ $this, 'registerRowMeta' ], 10, 2 );
+		add_filter( 'plugin_row_meta', [ $this, 'registerRowMeta' ], 10, 2 );
 		add_filter( 'plugin_action_links_' . AIOSEO_BROKEN_LINK_CHECKER_PLUGIN_BASENAME, [ $this, 'registerActionLinks' ], 10, 2 );
 
 		add_action( 'admin_footer', [ $this, 'addAioseoModalPortal' ] );
@@ -100,7 +100,7 @@ class Admin {
 	 * @return string         The modified HTML language attribute.
 	 */
 	public function addDirAttribute( $output ) {
-		if ( is_rtl() || preg_match( '/dir=[\'"](ltr|rtl|auto)[\'"]/i', $output ) ) {
+		if ( is_rtl() || preg_match( '/dir=[\'"](ltr|rtl|auto)[\'"]/i', (string) $output ) ) {
 			return $output;
 		}
 
@@ -183,10 +183,10 @@ class Admin {
 	 * @return void
 	 */
 	public function checkCurrentPage() {
-		global $admin_page_hooks;
+		global $admin_page_hooks; // phpcs:ignore Squiz.NamingConventions.ValidVariableName
 		$currentScreen = function_exists( 'get_current_screen' ) ? get_current_screen() : false;
 
-		if ( empty( $currentScreen->id ) || empty( $admin_page_hooks ) ) {
+		if ( empty( $currentScreen->id ) || empty( $admin_page_hooks ) ) { // phpcs:ignore Squiz.NamingConventions.ValidVariableName
 			return;
 		}
 
@@ -294,11 +294,22 @@ class Admin {
 	 * @return array              List of action links.
 	 */
 	public function registerRowMeta( $actions, $pluginFile ) {
+		$reviewLabel = str_repeat( '<span class="dashicons dashicons-star-filled" style="font-size: 18px; width:16px; height: 16px; color: #ffb900;"></span>', 5 );
+
 		$actionLinks = [
-			'settings' => [
+			'suggest-feature' => [
 				// Translators: This is an action link users can click to open a feature request.
 				'label' => __( 'Suggest a Feature', 'aioseo-broken-link-checker' ),
-				'url'   => aioseoBrokenLinkChecker()->helpers->utmUrl( AIOSEO_BROKEN_LINK_CHECKER_MARKETING_URL . 'blc-suggest-a-feature/', 'plugin-row-meta', 'Feature' ),
+				'url'   => aioseoBrokenLinkChecker()->helpers->utmUrl( AIOSEO_BROKEN_LINK_CHECKER_MARKETING_URL . 'blc-feature-suggestion/', 'plugin-row-meta', 'feature' ),
+			],
+			'review'          => [
+				'label' => $reviewLabel,
+				'url'   => aioseoBrokenLinkChecker()->helpers->utmUrl( AIOSEO_BROKEN_LINK_CHECKER_MARKETING_URL . 'review-blc', 'plugin-row-meta', 'review' ),
+				'title' => sprintf(
+					// Translators: 1 - The plugin name ("Broken Link Checker").
+					__( 'Rate %1$s', 'aioseo-broken-link-checker' ),
+					'Broken Link Checker'
+				)
 			]
 		];
 
@@ -353,8 +364,14 @@ class Admin {
 
 		if ( $this->plugin === $pluginFile && ! empty( $actionLinks ) ) {
 			foreach ( $actionLinks as $key => $value ) {
+
 				$link = [
-					$key => '<a href="' . $value['url'] . '" target="_blank">' . $value['label'] . '</a>'
+					$key => sprintf(
+						'<a href="%1$s" %2$s target="_blank">%3$s</a>',
+						esc_url( $value['url'] ),
+						isset( $value['title'] ) ? 'title="' . esc_attr( $value['title'] ) . '"' : '',
+						$value['label']
+					)
 				];
 
 				$actions = 'after' === $position ? array_merge( $actions, $link ) : array_merge( $link, $actions );
@@ -434,13 +451,13 @@ class Admin {
 		);
 
 		// Stop WP Core from outputting its version number and instead add both theirs & ours.
-		global $wp_version;
+		global $wp_version; // phpcs:ignore Squiz.NamingConventions.ValidVariableName
 		printf(
 			wp_kses_post( '<p class="alignright">%1$s</p>' ),
 			sprintf(
 				// Translators: 1 - WP Core version number, 2 - BLC version number.
 				esc_html__( 'WordPress %1$s | BLC %2$s', 'aioseo-broken-link-checker' ),
-				esc_html( $wp_version ),
+				esc_html( $wp_version ), // phpcs:ignore Squiz.NamingConventions.ValidVariableName
 				esc_html( AIOSEO_BROKEN_LINK_CHECKER_VERSION )
 			)
 		);

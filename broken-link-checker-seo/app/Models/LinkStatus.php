@@ -30,7 +30,7 @@ class LinkStatus extends Model {
 	 *
 	 * @var array
 	 */
-	protected $numericFields = [ 'id', 'broken', 'dismissed', 'scan_count', 'redirect_count', 'http_status_code' ];
+	protected $integerFields = [ 'id', 'broken', 'dismissed', 'scan_count', 'redirect_count', 'http_status_code' ];
 
 	/**
 	 * Fields that are nullable.
@@ -108,6 +108,31 @@ class LinkStatus extends Model {
 			->run()
 			->model( 'AIOSEO\\BrokenLinkChecker\\Models\\LinkStatus' );
 
+		if ( ! $linkStatus->exists() ) {
+			// Updates to the plugin can cause hash mismatches. Let's do another attempt using the URL.
+			// We do a join to improve performance since the URL isn't indexed.
+			$hostname = wp_parse_url( $url, PHP_URL_HOST );
+			$result   = aioseoBrokenLinkChecker()->core->db->start( 'aioseo_blc_link_status as abls' )
+				->select( 'abls.id' )
+				->join( 'aioseo_blc_links as abl', 'abls.id = abl.blc_link_status_id' )
+				->where( 'abl.hostname', $hostname )
+				->where( 'abls.url', $url )
+				->groupBy( 'abls.id' )
+				->limit( 1 )
+				->run()
+				->result();
+
+			if ( ! empty( $result[0]->id ) ) {
+				$linkStatus = self::getById( $result[0]->id );
+
+				if ( $linkStatus->exists() ) {
+					// Reset the URL hash to prevent future mismatches.
+					$linkStatus->url_hash = $hash;
+					$linkStatus->save();
+				}
+			}
+		}
+
 		return $linkStatus;
 	}
 
@@ -147,7 +172,7 @@ class LinkStatus extends Model {
 	 */
 	public static function rowQuery( $filter = 'all', $limit = 20, $offset = 0, $whereClause = '', $orderBy = '', $orderDir = 'DESC' ) {
 		$query = self::baseQuery( $filter, $whereClause )
-			->select( 'als.*' )
+			->select( 'als.*, al.external' )
 			->limit( $limit, $offset );
 
 		if ( $orderBy && $orderDir ) {
@@ -216,7 +241,7 @@ class LinkStatus extends Model {
 
 		$query = aioseoBrokenLinkChecker()->core->db->start( 'aioseo_blc_link_status as als' )
 			->join( 'aioseo_blc_links as al', 'als.id = al.blc_link_status_id' )
-			->join( 'posts as p', 'al.post_id = p.ID', 'RIGHT' )
+			->join( 'posts as p', 'al.post_id = p.ID' )
 			->groupBy( 'al.url' );
 
 		if ( ! empty( $whereClause ) ) {
@@ -251,6 +276,9 @@ class LinkStatus extends Model {
 					break;
 				case 'dismissed':
 					$query->where( 'als.dismissed', true );
+					break;
+				case 'not-checked':
+					$query->where( 'als.last_scan_date', null );
 					break;
 				case 'all':
 				default:

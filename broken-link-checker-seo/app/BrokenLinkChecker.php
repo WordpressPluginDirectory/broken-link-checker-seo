@@ -1,7 +1,6 @@
 <?php
 namespace AIOSEO\BrokenLinkChecker {
 	// Exit if accessed directly.
-
 	if ( ! defined( 'ABSPATH' ) ) {
 		exit;
 	}
@@ -206,7 +205,9 @@ namespace AIOSEO\BrokenLinkChecker {
 			$this->constants();
 			$this->includes();
 			$this->preLoad();
-			$this->load();
+			if ( ! $this->helpers->isUninstalling() ) {
+				$this->load();
+			}
 		}
 
 		/**
@@ -227,7 +228,7 @@ namespace AIOSEO\BrokenLinkChecker {
 
 			$constants = [
 				'AIOSEO_BROKEN_LINK_CHECKER_PLUGIN_BASENAME'  => plugin_basename( AIOSEO_BROKEN_LINK_CHECKER_FILE ),
-				'AIOSEO_BROKEN_LINK_CHECKER_PLUGIN_NAME'      => $pluginData['name'],
+				'AIOSEO_BROKEN_LINK_CHECKER_PLUGIN_NAME'      => 'Broken Link Checker',
 				'AIOSEO_BROKEN_LINK_CHECKER_PLUGIN_URL'       => plugin_dir_url( AIOSEO_BROKEN_LINK_CHECKER_FILE ),
 				'AIOSEO_BROKEN_LINK_CHECKER_VERSION'          => $pluginData['version'],
 				'AIOSEO_BROKEN_LINK_CHECKER_MARKETING_URL'    => 'https://aioseo.com/',
@@ -306,6 +307,8 @@ namespace AIOSEO\BrokenLinkChecker {
 			$this->core            = new Core\Core();
 			$this->internalOptions = new Options\InternalOptions();
 			$this->preUpdates      = new Main\PreUpdates();
+			$this->helpers         = new Utils\Helpers();
+			$this->options         = new Options\Options();
 		}
 
 		/**
@@ -316,8 +319,6 @@ namespace AIOSEO\BrokenLinkChecker {
 		 * @return void
 		 */
 		public function load() {
-			$this->helpers         = new Utils\Helpers();
-			$this->options         = new Options\Options();
 			$this->updates         = new Main\Updates();
 			$this->actionScheduler = new Utils\ActionScheduler();
 			$this->license         = new Admin\License();
